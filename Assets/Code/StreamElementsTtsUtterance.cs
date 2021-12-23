@@ -11,6 +11,12 @@ namespace StreamElementsTTS_Unity
         {
             StartCoroutine(StreamElementsTTSApi.SpeakRoutine(text, voice, audioSource));
         }
-    }
 
+        internal void Speak()
+        {
+            Debug.Log("Sock over it?");
+            StreamElementsTTSApi.SpeakRoutine(text, voice, audioSource);
+            audioSource.Play();
+        }
+    }
 }

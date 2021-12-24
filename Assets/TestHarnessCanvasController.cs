@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,12 +23,14 @@ public class TestHarnessCanvasController : MonoBehaviour
     {
         List<Dropdown.OptionData> opts = new List<Dropdown.OptionData>();
 
-        foreach (StreamElementsTTS_Unity.TtsVoices x in System.Enum.GetValues(typeof(StreamElementsTTS_Unity.TtsVoices))) {
+        var enums = System.Enum.GetValues(typeof(StreamElementsTTS_Unity.TtsVoices));
+        foreach (StreamElementsTTS_Unity.TtsVoices x in enums) {
             kvp.Add(x.ToString(), x);
             opts.Add(new Dropdown.OptionData(x.ToString()));
         }
 
         dm.VoicesList.AddOptions(opts);
+        dm.VoicesList.value = Array.IndexOf(enums, TTSScript.voice);
 
         dm.BtnSpeak.onClick.AddListener(() => { 
             TTSScript.text = dm.SpeakText.text;

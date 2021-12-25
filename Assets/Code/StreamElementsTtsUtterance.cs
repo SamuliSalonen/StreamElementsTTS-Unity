@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreTwitchLibSetup;
+using System;
 using UnityEngine;
 namespace StreamElementsTTS_Unity
 {
@@ -7,9 +8,10 @@ namespace StreamElementsTTS_Unity
         public AudioSource audioSource;
         public string text;
         public TtsVoices voice;
-
+        TwitchLibCtrl m_TwitchLib = null;
         private void Start()
         {
+            m_TwitchLib = FindObjectOfType<TwitchLibCtrl>();
             StartCoroutine(StreamElementsTTSApi.SpeakRoutine(text, voice, audioSource));
         }
 
@@ -24,9 +26,11 @@ namespace StreamElementsTTS_Unity
 
         public event Action<bool> onSpeakFrame;
         public float biggestView;
+        public bool isTalking => audioSource.isPlaying;
         private void Update()
         {
-            if (audioSource.isPlaying)
+
+            if (isTalking)
             {
                 audioSource.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
                 float biggest = -1;
@@ -49,7 +53,11 @@ namespace StreamElementsTTS_Unity
             else
             {
                 onSpeakFrame?.Invoke(false);
-
+                if (m_TwitchLib.GetNextMessage(out var msg))
+                {
+                    text = msg;
+                    Speak();
+                }
             }
             //print(biggest);
         }

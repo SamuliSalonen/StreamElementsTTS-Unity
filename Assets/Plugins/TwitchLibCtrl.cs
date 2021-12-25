@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using UnityEngine.Networking;
 using TwitchLib.Client.Events;
 using TMPro;
+using Newtonsoft.Json.Linq;
 
 namespace CoreTwitchLibSetup
 {
@@ -19,7 +20,7 @@ namespace CoreTwitchLibSetup
 
 
         [SerializeField]
-        private string _channelToConnectTo = "clayman6666";
+        private string _channelToConnectTo = "clayman666";
 
         private Client _client;
 
@@ -28,15 +29,16 @@ namespace CoreTwitchLibSetup
 
         string botName = "claybot6";
 
-        string client_id = "b1v0wdn4lwndiqp3jlr22qvaeza22b";
-
-        string apiKey = "oauth:ff086d8s6a3nagrz2l7t0rwsgqd37g";
+      
 
         private void Start()
         {
+            var secretsJson = System.IO.File.ReadAllText("C:/Temp/chatbot.txt");
+            var secretsParsed = JObject.Parse(secretsJson);
+
             Application.runInBackground = true;
 
-            ConnectionCredentials credentials = new ConnectionCredentials(botName, apiKey);
+            ConnectionCredentials credentials = new ConnectionCredentials(botName, secretsParsed["secret"].ToString());
             //setup irc client to connect to twitch
             _client = new Client();
             _client.Initialize(credentials, _channelToConnectTo);
@@ -48,7 +50,7 @@ namespace CoreTwitchLibSetup
             _client.Connect();
 
             _api = new Api();
-            _api.Settings.ClientId = client_id;//auth.client_id;
+            _api.Settings.ClientId = secretsParsed["clientId"].ToString();//auth.client_id;
         }
 
         private void OnConnectionError(object sender, OnConnectionErrorArgs e)

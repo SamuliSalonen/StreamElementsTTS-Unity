@@ -1023,7 +1023,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03b03ee8708d369459300838c238265a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _channelToConnectTo: clayman666
+  _channelToConnectTo: IrishJohnGames
+  botName: irishjerngaming
   m_SendConnectedMessage: 0
 --- !u!4 &653059435
 Transform:

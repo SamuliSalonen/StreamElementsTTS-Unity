@@ -24,7 +24,8 @@ namespace CoreTwitchLibSetup
 
         private Api _api;
 
-        string botName = "claybot6";
+        [SerializeField]
+        string botName = "irishjerngames";
 
         private void Start()
         {
@@ -34,6 +35,7 @@ namespace CoreTwitchLibSetup
             Application.runInBackground = true;
 
             ConnectionCredentials credentials = new ConnectionCredentials(botName, secretsParsed["secret"].ToString());
+
             //setup irc client to connect to twitch
             _client = new Client();
             _client.Initialize(credentials, _channelToConnectTo);

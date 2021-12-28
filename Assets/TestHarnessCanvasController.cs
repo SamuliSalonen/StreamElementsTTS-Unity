@@ -32,15 +32,17 @@ public class TestHarnessCanvasController : MonoBehaviour
         dm.VoicesList.AddOptions(opts);
         dm.VoicesList.value = Array.IndexOf(enums, TTSScript.voice);
 
+        dm.VoicesList.onValueChanged.AddListener(o =>
+        {
+            var y = dm.VoicesList.options[o].text;
+            TTSScript.voice = kvp[y];
+        });
+
         dm.BtnSpeak.onClick.AddListener(() => { 
             TTSScript.text = dm.SpeakText.text;
             TTSScript.Speak();
         });
 
-        dm.BtnSetVoice.onClick.AddListener(() => {
-            var y = dm.VoicesList.options[dm.VoicesList.value].text;
-            Debug.Log(y);
-            TTSScript.voice = kvp[y];
-        });
+        dm.BtnSetVoice.gameObject.SetActive(false);
     }
 }

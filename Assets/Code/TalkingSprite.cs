@@ -4,26 +4,38 @@ namespace StreamElementsTTS_Unity
 {
     public class TalkingSprite : MonoBehaviour
     {
-        public Sprite silent, speak;
+        public Sprite[] silent, speak;
         public new SpriteRenderer renderer;
 
         public bool isSpeaking;
 
+        int speakAmount = 0;
+
         private void Start()
         {
-            FindObjectOfType<StreamElementsTtsUtterance>().onSpeakFrame += (bool b) => isSpeaking = b;
+            FindObjectOfType<StreamElementsTtsUtterance>().onSpeakFrame += (bool b) => {
+                speakAmount++;
+
+                if (speakAmount % 2 == 1) return;
+
+                if (b) {
+                    isSpeaking = true;
+                }
+                else
+                    isSpeaking = false;
+
+                if(wasSpeaking != isSpeaking)
+                    renderer.sprite = RandomFromArray(isSpeaking ? speak : silent);
+
+                wasSpeaking = b;
+            };
         }
 
-        private void Update()
+        bool wasSpeaking = false;
+
+        Sprite RandomFromArray(Sprite[] ar)
         {
-            if(isSpeaking)
-            {
-                renderer.sprite = speak;
-            }
-            else
-            {
-                renderer.sprite = silent;
-            }
+            return ar[Random.Range(0, ar.Length)];
         }
     }
 }

@@ -17,8 +17,6 @@ namespace CoreTwitchLibSetup
 {
     public class TwitchLibCtrl : MonoBehaviour
     {
-
-
         [SerializeField]
         private string _channelToConnectTo = "clayman666";
 
@@ -26,10 +24,7 @@ namespace CoreTwitchLibSetup
 
         private Api _api;
 
-
         string botName = "claybot6";
-
-      
 
         private void Start()
         {

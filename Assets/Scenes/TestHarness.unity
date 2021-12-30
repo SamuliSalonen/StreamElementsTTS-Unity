@@ -252,6 +252,7 @@ MonoBehaviour:
   audioSource: {fileID: 19450447}
   text: hello world
   voice: 44
+  talkingContext: {fileID: 1435976649}
   biggestView: 0
 --- !u!4 &19450449
 Transform:
@@ -1023,8 +1024,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03b03ee8708d369459300838c238265a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _channelToConnectTo: IrishJohnGames
-  botName: irishjerngaming
+  _channelToConnectTo: clayman666
+  botName: claybot6
   m_SendConnectedMessage: 0
 --- !u!4 &653059435
 Transform:

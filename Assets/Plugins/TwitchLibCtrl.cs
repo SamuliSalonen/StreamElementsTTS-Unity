@@ -29,6 +29,7 @@ namespace CoreTwitchLibSetup
 
         private void Start()
         {
+            Messages = new Queue<string>();
             var secretsJson = System.IO.File.ReadAllText("C:/Temp/chatbot.txt");
             var secretsParsed = JObject.Parse(secretsJson);
 
@@ -96,16 +97,16 @@ namespace CoreTwitchLibSetup
 
         public bool GetNextMessage(out string msg)
         {
-            if (m_Messages.Count > 0)
+            if (Messages.Count > 0)
             {
-                msg = m_Messages.Dequeue();
+                msg = Messages.Dequeue();
                 return true;
             }
 
             msg = null;
             return false;
         }
-        Queue<string> m_Messages = new Queue<string>();
+        public static Queue<string> Messages = new Queue<string>();
         private void OnChatCommandReceived(object sender, TwitchLib.Client.Events.OnChatCommandReceivedArgs e)
         {
 
@@ -117,7 +118,7 @@ namespace CoreTwitchLibSetup
                 case "tts":
 
 
-                    m_Messages.Enqueue(e.Command.ArgumentsAsString);
+                    Messages.Enqueue(e.Command.ArgumentsAsString);
                     break;
                 default:
                     break;

@@ -1,5 +1,6 @@
 ﻿using CoreTwitchLibSetup;
 using System;
+using System.Collections;
 using UnityEngine;
 namespace StreamElementsTTS_Unity
 {
@@ -9,11 +10,20 @@ namespace StreamElementsTTS_Unity
         public string text;
         public TtsVoices voice;
         TwitchLibCtrl m_TwitchLib = null;
+        public Transform talkingContext;
         private void Start()
         {
             m_TwitchLib = FindObjectOfType<TwitchLibCtrl>();
-            StartCoroutine(StreamElementsTTSApi.SpeakRoutine(text, voice, audioSource));
+            //    StartCoroutine(StreamElementsTTSApi.SpeakRoutine(text, voice, audioSource));
+            m_ShowLocation = talkingContext.transform.position;
+
+            talkingContext.transform.position = new Vector3(15, m_ShowLocation.y, m_ShowLocation.z);
+            m_HiddenLocation = talkingContext.transform.position;
+
         }
+
+        Vector3 m_ShowLocation = Vector3.zero;
+        Vector3 m_HiddenLocation = Vector3.zero;
 
         internal void Speak()
         {
@@ -48,18 +58,98 @@ namespace StreamElementsTTS_Unity
 
                 biggestView = biggest;
                 onSpeakFrame?.Invoke(biggest > 0.05f);
-            
+
             }
             else
             {
                 onSpeakFrame?.Invoke(false);
-                if (m_TwitchLib.GetNextMessage(out var msg))
+
+                if(m_InPosition)
+                {
+
+                    /*
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        Speak();
+                    }*/
+                }
+
+                if (!m_IsMoving && m_TwitchLib.GetNextMessage(out var msg))
                 {
                     text = msg;
-                    Speak();
+                    //if ()
+                    {
+                        m_LastSpeakTime = Time.time;
+                        if (!m_InPosition)
+                        {
+                            m_IsMoving = true;
+
+                            StartCoroutine(MoveCharacterToSpeakingPosition(true));
+                        }
+                    
+                     
+                    }
+                }
+
+
+
+                if (Time.time > m_LastSpeakTime + 3 && m_InPosition)
+                {
+                    if (!m_IsHiding)
+                    {
+                        m_IsHiding = true;
+                        StartCoroutine(MoveCharacterToSpeakingPosition(false));
+
+
+                    }
                 }
             }
             //print(biggest);
+        }
+
+
+        float m_LastSpeakTime = 0;
+
+        bool m_IsMoving = false;
+        bool m_InPosition = false;
+        bool m_IsHiding = false;
+
+        IEnumerator MoveCharacterToSpeakingPosition(bool @in)
+        {
+            if (@in)
+            {
+                float elapsed = 0;
+                float time = 1;
+                while (elapsed < time)
+                {
+                    var progress = elapsed / time;
+                    talkingContext.transform.position = Vector3.Lerp(m_HiddenLocation, m_ShowLocation, progress);
+
+                    yield return new WaitForEndOfFrame();
+                    elapsed += Time.deltaTime;
+                }
+
+               // m_IsMoving = false;
+                m_InPosition = true;
+                Speak();
+            }
+            else
+            {
+                float elapsed = 0;
+                float time = 1;
+                while (elapsed < time)
+                {
+                    var progress = elapsed / time;
+                    talkingContext.transform.position = Vector3.Lerp(m_HiddenLocation, m_ShowLocation, 1f - progress);
+
+                    yield return new WaitForEndOfFrame();
+                    elapsed += Time.deltaTime;
+                }
+
+                m_IsHiding = false;
+                m_InPosition = false;
+                m_IsMoving = false;
+            }
         }
     }
 }

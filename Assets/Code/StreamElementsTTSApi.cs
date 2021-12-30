@@ -28,9 +28,10 @@ namespace StreamElementsTTS_Unity
             var uri = BuildRequestUri(text, voice);
             return GetAudioClipRoutine(uri, (clip) =>
             {
+                /*
                 float[] samples = new float[clip.samples * clip.channels];
                 clip.GetData(samples, 0);
-           
+           */
                 audioSource.PlayOneShot(clip);
               
             });

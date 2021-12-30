@@ -38,9 +38,10 @@ public class TestHarnessCanvasController : MonoBehaviour
             TTSScript.voice = kvp[y];
         });
 
-        dm.BtnSpeak.onClick.AddListener(() => { 
-            TTSScript.text = dm.SpeakText.text;
-            TTSScript.Speak();
+        dm.BtnSpeak.onClick.AddListener(() => {
+            CoreTwitchLibSetup.TwitchLibCtrl.Messages.Enqueue(dm.SpeakText.text);
+            //TTSScript.text = dm.SpeakText.text;
+          //  TTSScript.Speak();
         });
 
         dm.BtnSetVoice.gameObject.SetActive(false);

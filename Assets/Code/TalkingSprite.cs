@@ -13,6 +13,8 @@ namespace StreamElementsTTS_Unity
 
         private void Start()
         {
+            renderer.sprite = RandomFromArray(silent);
+
             FindObjectOfType<StreamElementsTtsUtterance>().onSpeakFrame += (bool b) => {
                 speakAmount++;
 

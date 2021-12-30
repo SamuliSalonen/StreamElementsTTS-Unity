@@ -81,7 +81,8 @@ namespace CoreTwitchLibSetup
         private void OnMessageReceived(object sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
         {
 
-            Messages.Enqueue(e.ChatMessage.Message);
+            var message = e.ChatMessage.Message.ToLower().Replace("john", "me");
+            Messages.Enqueue(message);
             
             /*
 			MessagesReceivedIRC.Add(new MessageCache()

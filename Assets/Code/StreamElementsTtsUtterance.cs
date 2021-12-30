@@ -27,7 +27,7 @@ namespace StreamElementsTTS_Unity
 
         internal void Speak()
         {
-            Debug.Log("Sock over it?");
+
             StartCoroutine(StreamElementsTTSApi.SpeakRoutine(text, voice, audioSource));
             //audioSource.Play();
         }
@@ -58,6 +58,11 @@ namespace StreamElementsTTS_Unity
 
                 biggestView = biggest;
                 onSpeakFrame?.Invoke(biggest > 0.05f);
+                
+                if(Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.X))
+                {
+                    audioSource.Stop();
+                }
 
             }
             else

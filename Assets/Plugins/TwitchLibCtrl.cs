@@ -80,6 +80,9 @@ namespace CoreTwitchLibSetup
 
         private void OnMessageReceived(object sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
         {
+
+            Messages.Enqueue(e.ChatMessage.Message);
+            
             /*
 			MessagesReceivedIRC.Add(new MessageCache()
 			{

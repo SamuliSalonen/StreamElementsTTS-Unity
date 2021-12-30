@@ -21,6 +21,10 @@ public class TestHarnessCanvasController : MonoBehaviour
 
     private void Awake()
     {
+#if !UNITY_EDITOR
+
+        gameObject.SetActive(false);
+#endif
         List<Dropdown.OptionData> opts = new List<Dropdown.OptionData>();
 
         var enums = System.Enum.GetValues(typeof(StreamElementsTTS_Unity.TtsVoices));

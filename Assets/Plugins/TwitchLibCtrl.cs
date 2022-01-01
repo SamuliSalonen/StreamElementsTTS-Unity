@@ -12,6 +12,7 @@ using UnityEngine.Networking;
 using TwitchLib.Client.Events;
 using TMPro;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace CoreTwitchLibSetup
 {
@@ -49,6 +50,40 @@ namespace CoreTwitchLibSetup
 
             _api = new Api();
             _api.Settings.ClientId = secretsParsed["clientId"].ToString();//auth.client_id;
+          //  _api.Settings.AccessToken = secretsParsed["secret"].ToString();
+            StartCoroutine(GetAccessToken(secretsParsed["clientId"].ToString(), secretsParsed["clientSecret"].ToString(), (token)=> {
+                _api.Settings.AccessToken = token;
+                GetUser();
+            }));
+           // 
+        }
+
+        IEnumerator GetAccessToken(string clientId, string clientSecret, Action<string> callback)
+        {
+            var form = new WWWForm();
+            form.AddField("grant_type", "client_credentials");
+            form.AddField("client_id", clientId);
+            form.AddField("client_secret", clientSecret);
+
+            using (UnityWebRequest www = UnityWebRequest.Post("https://id.twitch.tv/oauth2/token", form))
+            {
+                yield return www.SendWebRequest();
+                var json = JObject.Parse(www.downloadHandler.text);
+                callback(json["access_token"].ToString());
+                // print(www.downloadHandler.text);
+                
+            }
+        }
+
+        async void GetUser()
+        {
+            var usersResult = await _api.Helix.Users.GetUsersAsync(null, new List<string>() { "clayman666" });
+            //    var userResult = await _api.V5.Users.GetUserByNameAsync("clayman666");
+            foreach (var item in usersResult.Users)
+            {
+                print(item.Id);
+            }
+
         }
 
         private void OnConnectionError(object sender, OnConnectionErrorArgs e)
@@ -83,7 +118,7 @@ namespace CoreTwitchLibSetup
 
             var message = e.ChatMessage.Message.ToLower().Replace("john", "me");
             Messages.Enqueue(message);
-            
+
             /*
 			MessagesReceivedIRC.Add(new MessageCache()
 			{

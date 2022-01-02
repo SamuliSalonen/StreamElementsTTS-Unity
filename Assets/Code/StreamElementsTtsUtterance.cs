@@ -37,6 +37,7 @@ namespace StreamElementsTTS_Unity
         public event Action<bool> onSpeakFrame;
         public float biggestView;
         public bool isTalking => audioSource.isPlaying;
+        public event Action onBeginSpeak;
         private void Update()
         {
 
@@ -88,7 +89,7 @@ namespace StreamElementsTTS_Unity
                         if (!m_InPosition)
                         {
                             m_IsMoving = true;
-
+                            onBeginSpeak?.Invoke();
                             StartCoroutine(MoveCharacterToSpeakingPosition(true));
                         }
                     

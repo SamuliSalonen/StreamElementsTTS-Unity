@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7688bd161ecbaaf4d9ec3256d6083d35, type: 3}
+  m_Name: jern
+  m_EditorClassIdentifier: 
+  voice: 44
+  silent:
+  - {fileID: 21300000, guid: 71a794deef4ba974084cefad7259a460, type: 3}
+  - {fileID: 21300000, guid: b09b2e0b2f2c25c42833392d8455c743, type: 3}
+  - {fileID: 21300000, guid: e4d23e752c687324d96876e62dde0ea7, type: 3}
+  - {fileID: 21300000, guid: 44e7f3fc05ef9d34f9ab9bf791715e06, type: 3}
+  - {fileID: 21300000, guid: 4aefe6f0c5784de4f9258f13fb21e1b7, type: 3}
+  talk:
+  - {fileID: 21300000, guid: e89e52d565fbb8d478cf336bf01a33d1, type: 3}
+  - {fileID: 21300000, guid: 1e007552adf9ea54991ace84a8f3d8b5, type: 3}
+  - {fileID: 21300000, guid: 0aa260cd6875f9944a2ce0aea9b08147, type: 3}
+  - {fileID: 21300000, guid: 008b7d0b02ec667418d2689ea9bfb17e, type: 3}
+  - {fileID: 21300000, guid: 5063eed4384c4494b8bbbf0228dfc987, type: 3}
+  - {fileID: 21300000, guid: f51604318180d5241bbafce9ec93390d, type: 3}
+  - {fileID: 21300000, guid: b9417fb4fca15b740b7550d08dcb503c, type: 3}

@@ -1961,6 +1961,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: b9417fb4fca15b740b7550d08dcb503c, type: 3}
   renderer: {fileID: 1435976648}
   isSpeaking: 0
+  m_Characters:
+  - {fileID: 11400000, guid: d6425ba922af7674797cb7c6e9a751d0, type: 2}
+  - {fileID: 11400000, guid: 70dcfc779845d234b96d8aa82e81639c, type: 2}
+  - {fileID: 11400000, guid: c0907ba002d26ec4bb482bf3a388a2f9, type: 2}
 --- !u!212 &1435976648
 SpriteRenderer:
   m_ObjectHideFlags: 0

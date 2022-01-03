@@ -12,7 +12,6 @@ using UnityEngine.Networking;
 using TwitchLib.Client.Events;
 using TMPro;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 
 namespace CoreTwitchLibSetup
 {
@@ -21,22 +20,46 @@ namespace CoreTwitchLibSetup
         [SerializeField]
         private string _channelToConnectTo = "clayman666";
 
+        [SerializeField]
+        string botName = "irishjerngames";
+
+        [SerializeField]
+        bool m_SendConnectedMessage = false;
+
+        [SerializeField]
+        string stringToReplace = "john";
+
+        [SerializeField]
+        string stringToReplaceWith = "me";
+
+        [SerializeField]
+        bool replaceStrings = false;
+
+        [SerializeField]
+        bool ttsForEveryChatMessage = false;
+
+        [SerializeField]
+        bool useFallback = false;
+
+        public static Queue<string> Messages = new Queue<string>();
+
         private Client _client;
 
         private Api _api;
 
-        [SerializeField]
-        string botName = "irishjerngames";
+        private PubSub _pubSub;
+
+        private string _channelId;
 
         private void Start()
         {
             Messages = new Queue<string>();
-            var secretsJson = System.IO.File.ReadAllText("C:/Temp/chatbot.txt");
+            var secretsJson = System.IO.File.ReadAllText("D:/Unity/Chatbot.txt");
             var secretsParsed = JObject.Parse(secretsJson);
 
             Application.runInBackground = true;
 
-            ConnectionCredentials credentials = new ConnectionCredentials(botName, secretsParsed["secret"].ToString());
+            ConnectionCredentials credentials = new ConnectionCredentials(botName, secretsParsed["oauth"].ToString());
 
             //setup irc client to connect to twitch
             _client = new Client();
@@ -48,14 +71,39 @@ namespace CoreTwitchLibSetup
             _client.OnChatCommandReceived += OnChatCommandReceived;
             _client.Connect();
 
+            _pubSub = new PubSub();
+            _pubSub.OnPubSubServiceError += OnPubSubServiceError;
+            _pubSub.OnPubSubServiceClosed += OnPubSubServiceClosed;
+            _pubSub.OnListenResponse += OnListenResponse;
+            _pubSub.OnChannelPointsRewardRedeemed += OnChannelPointsReceived;
+
+            _pubSub.OnPubSubServiceConnected += (object sender, EventArgs e) => 
+            {
+                StartCoroutine(_api.InvokeAsync(_api.Helix.Users.GetUsersAsync(logins: new List<string> { _channelToConnectTo }).ContinueWith(t =>
+                {
+                    _channelId = t.Result.Users.FirstOrDefault().Id;
+
+                    if (useFallback)
+                        _pubSub.ListenToRewards(_channelId); // GOOD AS A FALLBACK FOR DEBUG.
+                    else
+                        _pubSub.ListenToChannelPoints(_channelId);
+
+                    _pubSub.SendTopics(/*secretsParsed["oauth"].ToString()*/);
+
+                    Debug.Log($"Connected to channel with id: {_channelId}");
+                })));
+            };
+
             _api = new Api();
-            _api.Settings.ClientId = secretsParsed["clientId"].ToString();//auth.client_id;
-          //  _api.Settings.AccessToken = secretsParsed["secret"].ToString();
-            StartCoroutine(GetAccessToken(secretsParsed["clientId"].ToString(), secretsParsed["clientSecret"].ToString(), (token)=> {
+            _api.Settings.ClientId = secretsParsed["clientId"].ToString();
+            _api.Settings.AccessToken = secretsParsed["clientSecret"].ToString();
+            StartCoroutine(GetAccessToken(secretsParsed["clientId"].ToString(), secretsParsed["clientSecret"].ToString(), (token) =>
+            {
                 _api.Settings.AccessToken = token;
-                GetUser();
+
+                // only connect once we have the token
+                _pubSub.Connect();
             }));
-           // 
         }
 
         IEnumerator GetAccessToken(string clientId, string clientSecret, Action<string> callback)
@@ -70,20 +118,39 @@ namespace CoreTwitchLibSetup
                 yield return www.SendWebRequest();
                 var json = JObject.Parse(www.downloadHandler.text);
                 callback(json["access_token"].ToString());
-                // print(www.downloadHandler.text);
-                
             }
         }
 
-        async void GetUser()
+        private void OnPubSubServiceClosed(object sender, EventArgs e)
         {
-            var usersResult = await _api.Helix.Users.GetUsersAsync(null, new List<string>() { "clayman666" });
-            //    var userResult = await _api.V5.Users.GetUserByNameAsync("clayman666");
-            foreach (var item in usersResult.Users)
-            {
-                print(item.Id);
-            }
+            Debug.Log("CLOSED");
+        }
 
+        private void OnPubSubServiceError(object sender, OnPubSubServiceErrorArgs e)
+        {
+            Debug.Log("ERROR");
+        }
+
+        private void OnRewardRedeemed(object sender, OnRewardRedeemedArgs e)
+        {
+            Debug.Log($"Reward Redeemed listener triggered.. Use Fallback: { useFallback } || {e.RewardTitle}");
+
+            if (useFallback)
+                OnChannelPointRedemption(e.RewardTitle, e.Message);
+        }
+
+        private void OnChannelPointsReceived(object sender, OnChannelPointsRewardRedeemedArgs e)
+        {
+            Debug.Log($"Channel Point received listener triggered.. Use Fallback: { useFallback } || {e.RewardRedeemed.Redemption.Reward.Title}");
+
+            if (!useFallback)
+                OnChannelPointRedemption(e.RewardRedeemed.Redemption.Reward.Title, e.RewardRedeemed.Redemption.Reward.Prompt);
+        }
+
+        void OnChannelPointRedemption(string rewardTitle, string ttsText)
+        {
+            if (rewardTitle.Equals("Text to Speech!"))
+                Messages.Enqueue(ttsText);
         }
 
         private void OnConnectionError(object sender, OnConnectionErrorArgs e)
@@ -96,28 +163,31 @@ namespace CoreTwitchLibSetup
 
         private void OnListenResponse(object sender, OnListenResponseArgs e)
         {
-            if (e.Successful) Debug.Log("Listening"); // Debug.Log($"Successfully verified listening to topic: {e.Topic}");
-            else Debug.Log($"Failed to listen! Error: {e.Response.Error}");
+            if (e.Successful)
+                Debug.Log("Listening"); // Debug.Log($"Successfully verified listening to topic: {e.Topic}");
+            else
+                Debug.Log($"Failed to listen! Error: {e.Response.Error}");
         }
-        [SerializeField]
-        bool m_SendConnectedMessage = false;
-        private void OnConnected(object sender, TwitchLib.Client.Events.OnConnectedArgs e)
+
+        private void OnConnected(object sender, OnConnectedArgs e)
         {
             if (m_SendConnectedMessage)
                 _client.SendMessage(_channelToConnectTo, "connected");
         }
 
-        private void OnJoinedChannel(object sender, TwitchLib.Client.Events.OnJoinedChannelArgs e)
+        private void OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             Debug.Log("joined");
 
         }
 
-        private void OnMessageReceived(object sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
+        private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-
-            var message = e.ChatMessage.Message.ToLower().Replace("john", "me");
-            Messages.Enqueue(message);
+            if (ttsForEveryChatMessage)
+                if (replaceStrings)
+                    Messages.Enqueue(e.ChatMessage.Message.ToLower().Replace(stringToReplace, stringToReplaceWith));
+                else
+                    Messages.Enqueue(e.ChatMessage.Message);
 
             /*
 			MessagesReceivedIRC.Add(new MessageCache()
@@ -131,9 +201,6 @@ namespace CoreTwitchLibSetup
 			*/
         }
 
-
-
-
         public bool GetNextMessage(out string msg)
         {
             if (Messages.Count > 0)
@@ -145,25 +212,19 @@ namespace CoreTwitchLibSetup
             msg = null;
             return false;
         }
-        public static Queue<string> Messages = new Queue<string>();
-        private void OnChatCommandReceived(object sender, TwitchLib.Client.Events.OnChatCommandReceivedArgs e)
+
+        private void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
-
-
             //switch statement based on command text
             switch (e.Command.CommandText)
             {
                 //in case typing !join
                 case "tts":
-
-
                     Messages.Enqueue(e.Command.ArgumentsAsString);
                     break;
                 default:
                     break;
             }
         }
-
-
     }
 }

@@ -6,6 +6,7 @@ namespace StreamElementsTTS_Unity
     {
         public Sprite[] silent, speak;
         public new SpriteRenderer renderer;
+        //public UnityEngine.UI.Image renderer;
 
         public bool isSpeaking;
 

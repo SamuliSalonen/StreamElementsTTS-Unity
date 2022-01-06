@@ -15,6 +15,8 @@ public class TestHarnessCanvasController : MonoBehaviour
 
         [SerializeField] internal Dropdown VoicesList;
         [SerializeField] internal Button BtnSetVoice;
+
+        [SerializeField] internal Button BtnSkipCurrent;
     }
 
     Dictionary<string, StreamElementsTTS_Unity.TtsVoices> kvp = new Dictionary<string, StreamElementsTTS_Unity.TtsVoices>();
@@ -22,7 +24,6 @@ public class TestHarnessCanvasController : MonoBehaviour
     private void Awake()
     {
 #if !UNITY_EDITOR
-
         gameObject.SetActive(false);
 #endif
         List<Dropdown.OptionData> opts = new List<Dropdown.OptionData>();
@@ -49,5 +50,11 @@ public class TestHarnessCanvasController : MonoBehaviour
         });
 
         dm.BtnSetVoice.gameObject.SetActive(false);
+
+        dm.BtnSkipCurrent.onClick.AddListener(() =>
+        {
+            var utterance = FindObjectOfType<StreamElementsTTS_Unity.StreamElementsTtsUtterance>();
+            utterance.audioSource.Stop();
+        });
     }
 }

@@ -27,7 +27,6 @@ namespace StreamElementsTTS_Unity
 
         internal void Speak()
         {
-
             StartCoroutine(StreamElementsTTSApi.SpeakRoutine(text, voice, audioSource));
             //audioSource.Play();
         }

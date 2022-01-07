@@ -18,7 +18,7 @@ namespace CoreTwitchLibSetup
 {
     public class TwitchLibCtrl : MonoBehaviour
     {
-        TtsSkipHandler ttsSkipHandler = new TtsSkipHandler();
+        internal TtsSkipHandler ttsSkipHandler = new TtsSkipHandler();
 
         public static Queue<string> Messages = new Queue<string>();
 
@@ -159,6 +159,8 @@ namespace CoreTwitchLibSetup
                 _client.SendMessage(_Settings.ChannelToConnectTo, "connected");
         }
 
+        internal void SendMessageFromBot(string msg) => _client.SendMessage(_Settings.ChannelToConnectTo, msg);
+
         private void OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             Debug.Log("joined");
@@ -167,6 +169,9 @@ namespace CoreTwitchLibSetup
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
+            if(e.ChatMessage.DisplayName.StartsWith("buttsbot"))
+                Messages.Enqueue(e.ChatMessage.Message.ToLower());
+
             if (_Settings.IgnoreUserList.Contains(e.ChatMessage.DisplayName)) return;
 
             if (_Settings.TtsForEveryChatMessage)
@@ -181,6 +186,7 @@ namespace CoreTwitchLibSetup
             if (Messages.Count > 0)
             {
                 msg = Messages.Dequeue();
+                ttsSkipHandler.ResetVoteAmount();
                 return true;
             }
 
@@ -196,8 +202,7 @@ namespace CoreTwitchLibSetup
             switch (e.Command.CommandText.ToLower())
             {
                 case Commands.TTS:
-                    if (_Settings.AntiBitGameyMode && e.Command.ChatMessage.Message.Contains("777"))
-                    {
+                    if (_Settings.AntiBitGameyMode && e.Command.ChatMessage.Message.Contains("777")) {
                         // Anti-BitGamey
                         Messages.Enqueue("Feck off with your sevens BitGamey!");
                         return;
@@ -216,10 +221,8 @@ namespace CoreTwitchLibSetup
     }
 }
 
-public class Constants
-{
-    public class Commands
-    {
+public class Constants {
+    public class Commands {
         internal const string SKIP = "skip";
         internal const string TTS = "tts";
     }
@@ -239,11 +242,11 @@ public class TtsSkipHandler
     List<string> Voters = new List<string>();
 
     int currentVoteAmount = 0;
-    void ResetVoteAmount()
-    {
+    internal void ResetVoteAmount() {
         Voters = new List<string>();
         currentVoteAmount = 0;
     }
+
     void IncrementVoteAmount(string voter) {
         Voters.Add(voter);
         currentVoteAmount++;
@@ -257,7 +260,6 @@ public class TtsSkipHandler
             return;
         }
 
-        // UserAlreadyVoted; 
         if (Voters.Contains(cm.DisplayName))
             return;
 
@@ -273,12 +275,15 @@ public class TtsSkipHandler
         }
     }
 
-    void SkipCurrentMessage()
+    internal void SkipCurrentMessage()
     {
         var utterance = _Dependencies.UtteranceScript;
         utterance.audioSource.Stop();
 
         CoreTwitchLibSetup.TwitchLibCtrl.OnMessageWasSkipped?.Invoke();
+
+        _Dependencies.TwitchLibShite.SendMessageFromBot("Skipped!");
+        _Dependencies.ShutUp.Play();
     }
 
     void Output(string msg) => Debug.Log($"[SkipHandler] {msg}");

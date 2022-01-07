@@ -45,16 +45,12 @@ public class TestHarnessCanvasController : MonoBehaviour
 
         dm.BtnSpeak.onClick.AddListener(() => {
             CoreTwitchLibSetup.TwitchLibCtrl.Messages.Enqueue(dm.SpeakText.text);
-            //TTSScript.text = dm.SpeakText.text;
-          //  TTSScript.Speak();
         });
 
         dm.BtnSetVoice.gameObject.SetActive(false);
 
-        dm.BtnSkipCurrent.onClick.AddListener(() =>
-        {
-            var utterance = FindObjectOfType<StreamElementsTTS_Unity.StreamElementsTtsUtterance>();
-            utterance.audioSource.Stop();
+        dm.BtnSkipCurrent.onClick.AddListener(() => {
+            FindObjectOfType<CoreTwitchLibSetup.TwitchLibCtrl>().ttsSkipHandler.SkipCurrentMessage();
         });
     }
 }

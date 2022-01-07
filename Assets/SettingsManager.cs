@@ -80,6 +80,7 @@ namespace Settings
             // [SerializeField] public StreamElementsTTS_Unity.StreamElementsTTSApi ApiScript;
             [SerializeField] public CoreTwitchLibSetup.TwitchLibCtrl TwitchLibShite;
             [SerializeField] public StreamElementsTTS_Unity.TalkingSprite TalkingSprite;
+            [SerializeField] public AudioSource ShutUp;
         }
     }
 

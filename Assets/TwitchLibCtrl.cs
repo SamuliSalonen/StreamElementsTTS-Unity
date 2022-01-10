@@ -169,10 +169,21 @@ namespace CoreTwitchLibSetup
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            if(e.ChatMessage.DisplayName.StartsWith("buttsbot"))
+            if (e.ChatMessage.DisplayName.StartsWith("buttsbot") && e.ChatMessage.Message != ":D")
+            {
                 Messages.Enqueue(e.ChatMessage.Message.ToLower());
 
+                if(_Settings.ReplyToButtsbot)
+                    _client.SendMessage(_Settings.ChannelToConnectTo, "buttsbot yes");
+            }
+
             if (_Settings.IgnoreUserList.Contains(e.ChatMessage.DisplayName)) return;
+
+            if (_Settings.BardakifyHis && (e.ChatMessage.Message.ToLower().StartsWith("im") || e.ChatMessage.Message.ToLower().StartsWith("i'm"))) {
+                string[] x = e.ChatMessage.Message.Split(' ');
+                if(x.Length > 1)
+                    _client.SendMessage(_Settings.ChannelToConnectTo, $"Hi {x[1]}, I'm Bardaky.");
+            }
 
             if (_Settings.TtsForEveryChatMessage)
                 if (_Settings.ReplaceStrings)

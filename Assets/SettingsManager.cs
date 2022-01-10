@@ -48,21 +48,32 @@ namespace Settings
         }
 
         [System.Serializable] public class AppSettings {
-            [SerializeField] internal string PathToAuthFile = "";
             [SerializeField] internal ScreenMode Mode;
-            [SerializeField] internal bool AllowAudienceSkip = false;
-            [SerializeField] internal bool AntiBitGameyMode = true;
 
-            [SerializeField] internal int AllowAudienceSkipAmountOfVotesRequired = 3;
+            [Header("Auth")]
+            [SerializeField] internal string PathToAuthFile = "";
+            [SerializeField] internal bool UseFallback = false;
 
+            [Header("Bot")]
             [SerializeField] internal string ChannelToConnectTo = "clayman666";
             [SerializeField] internal string BotName = "irishjerngames";
             [SerializeField] internal bool SendConnectedMessage = false;
+
+            [Header("Skipping")]
+            [SerializeField] internal int AllowAudienceSkipAmountOfVotesRequired = 3;
+            [SerializeField] internal bool AllowAudienceSkip = false;
+
+            [Header("Features")]
+            [SerializeField] internal bool ReplyToButtsbot = true;
+            [SerializeField] internal bool BardakifyHis = true;
+
+            [SerializeField] internal bool AntiBitGameyMode = true;
+
+            [SerializeField] internal bool ReplaceStrings = false;
             [SerializeField] internal string StringToReplace = "john";
             [SerializeField] internal string StringToReplaceWith = "me";
-            [SerializeField] internal bool ReplaceStrings = false;
+
             [SerializeField] internal bool TtsForEveryChatMessage = false;
-            [SerializeField] internal bool UseFallback = false;
 
             [SerializeField] internal List<string> IgnoreUserList = new List<string>() {
                 "StreamElements", "Streamlabs", "Nightbot", "NightBot"

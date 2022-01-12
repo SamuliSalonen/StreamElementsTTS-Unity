@@ -39,7 +39,6 @@ namespace StreamElementsTTS_Unity
         public event Action onBeginSpeak;
         private void Update()
         {
-
             if (isTalking)
             {
                 audioSource.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);

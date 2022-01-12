@@ -64,6 +64,7 @@ namespace Settings
             [SerializeField] internal bool AllowAudienceSkip = false;
 
             [Header("Features")]
+            [SerializeField] internal bool AllowPauseResume = true;
             [SerializeField] internal bool ReplyToButtsbot = true;
             [SerializeField] internal bool BardakifyHis = true;
 

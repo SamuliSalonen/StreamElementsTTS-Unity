@@ -17,6 +17,7 @@ public class TestHarnessCanvasController : MonoBehaviour
         [SerializeField] internal Button BtnSetVoice;
 
         [SerializeField] internal Button BtnSkipCurrent;
+        [SerializeField] internal Button BtnTogglePause;
     }
 
     Dictionary<string, StreamElementsTTS_Unity.TtsVoices> kvp = new Dictionary<string, StreamElementsTTS_Unity.TtsVoices>();
@@ -51,6 +52,11 @@ public class TestHarnessCanvasController : MonoBehaviour
 
         dm.BtnSkipCurrent.onClick.AddListener(() => {
             FindObjectOfType<CoreTwitchLibSetup.TwitchLibCtrl>().ttsSkipHandler.SkipCurrentMessage();
+        });
+
+        dm.BtnTogglePause.onClick.AddListener(() =>
+        {
+            CoreTwitchLibSetup.TwitchLibCtrl.TTSPaused = !CoreTwitchLibSetup.TwitchLibCtrl.TTSPaused;
         });
     }
 }

@@ -32,7 +32,7 @@ namespace CoreTwitchLibSetup
         private void Start()
         {
             OnMessageWasSkipped += () => {
-                Debug.Log("Something was skipped");
+                // Debug.Log("Something was skipped");
             };
 
             Messages = new Queue<string>();
@@ -192,8 +192,16 @@ namespace CoreTwitchLibSetup
                     Messages.Enqueue(e.ChatMessage.Message);
         }
 
+        public static bool TTSPaused = false;
+
         public bool GetNextMessage(out string msg)
         {
+            if (TTSPaused)
+            {
+                msg = null;
+                return false;
+            }
+
             if (Messages.Count > 0)
             {
                 msg = Messages.Dequeue();
@@ -225,10 +233,25 @@ namespace CoreTwitchLibSetup
                     if (_Settings.AllowAudienceSkip)
                         ttsSkipHandler.OnSkipMessageReceived?.Invoke(e.Command.ChatMessage);
                     break;
+                case Commands.Pause:
+                    if(_Settings.AllowPauseResume && SenderHasElevatedPermissions(e)) {
+                        TTSPaused = true;
+                        _Dependencies.UtteranceScript.audioSource.Pause();
+                    }
+                    break;
+                case Commands.Resume:
+                    if(_Settings.AllowPauseResume && SenderHasElevatedPermissions(e)) {
+                        TTSPaused = false;
+                        _Dependencies.UtteranceScript.audioSource.UnPause();
+                        _Dependencies.TalkingSprite.isSpeaking = true;
+                    }
+                    break;
                 default:
                     break;
             }
         }
+
+        bool SenderHasElevatedPermissions(OnChatCommandReceivedArgs e) => e.Command.ChatMessage.IsModerator || e.Command.ChatMessage.IsBroadcaster || e.Command.ChatMessage.IsVip;
     }
 }
 
@@ -236,6 +259,8 @@ public class Constants {
     public class Commands {
         internal const string SKIP = "skip";
         internal const string TTS = "tts";
+        internal const string Pause = "pause";
+        internal const string Resume = "resume";
     }
 
     public class OauthKeywords {

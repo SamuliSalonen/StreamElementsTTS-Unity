@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using static Settings.SettingsManager;
+using static Constants;
 
 namespace StreamElementsTTS_Unity
 {
@@ -11,15 +13,15 @@ namespace StreamElementsTTS_Unity
         public bool isSpeaking;
 
         int speakAmount = 0;
-        TtsCharacter m_ActiveCharacter = null;
         [SerializeField]
-        TtsCharacter[] m_Characters = null;
+        internal TtsCharacter m_ActiveCharacter = null;
+
         private void Start()
         {
             renderer.sprite = RandomFromArray(silent);
             var utterance = FindObjectOfType<StreamElementsTtsUtterance>();
             utterance.onBeginSpeak += () => {
-                m_ActiveCharacter = m_Characters[UnityEngine.Random.Range(0, m_Characters.Length)];
+                m_ActiveCharacter = m_ActiveCharacter ?? _Dependencies.AllCharacters[UnityEngine.Random.Range(0, _Dependencies.AllCharacters.Count)];
                 renderer.sprite = RandomFromArray(m_ActiveCharacter.silent);
                 utterance.voice = m_ActiveCharacter.voice;
             };

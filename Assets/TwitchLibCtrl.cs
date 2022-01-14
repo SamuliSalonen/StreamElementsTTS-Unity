@@ -164,7 +164,6 @@ namespace CoreTwitchLibSetup
         private void OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             Debug.Log("joined");
-
         }
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
@@ -227,7 +226,24 @@ namespace CoreTwitchLibSetup
                         return;
                     }
 
-                    Messages.Enqueue(e.Command.ArgumentsAsString);
+                    if(_Dependencies.TalkingSprite != null && _Dependencies.TalkingSprite.m_ActiveCharacter != null && _Dependencies.TalkingSprite.m_ActiveCharacter.name == "frog_daky")
+                    {
+                        string dakified = "";
+
+                        foreach (var word in e.Command.ArgumentsAsString.Split(' '))
+                        {
+                            if(UnityEngine.Random.Range(0, 50) > 30)
+                                dakified += word + "daky" + ' ';
+                            else
+                                dakified += word + ' ';
+                        }
+
+                        Messages.Enqueue(dakified);
+                    } else
+                    {
+                        Messages.Enqueue(e.Command.ArgumentsAsString);
+                    }
+
                     break;
                 case Commands.SKIP:
                     if (_Settings.AllowAudienceSkip)

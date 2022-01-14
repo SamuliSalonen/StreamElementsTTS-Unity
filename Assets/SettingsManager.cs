@@ -93,6 +93,7 @@ namespace Settings
             [SerializeField] public CoreTwitchLibSetup.TwitchLibCtrl TwitchLibShite;
             [SerializeField] public StreamElementsTTS_Unity.TalkingSprite TalkingSprite;
             [SerializeField] public AudioSource ShutUp;
+            [SerializeField] public List<StreamElementsTTS_Unity.TtsCharacter> AllCharacters;
         }
     }
 

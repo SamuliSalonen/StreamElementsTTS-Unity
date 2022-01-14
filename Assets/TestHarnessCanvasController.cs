@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class TestHarnessCanvasController : MonoBehaviour
 {
@@ -18,31 +19,20 @@ public class TestHarnessCanvasController : MonoBehaviour
 
         [SerializeField] internal Button BtnSkipCurrent;
         [SerializeField] internal Button BtnTogglePause;
+
+        [SerializeField] internal Dropdown Characters;
     }
 
-    Dictionary<string, StreamElementsTTS_Unity.TtsVoices> kvp = new Dictionary<string, StreamElementsTTS_Unity.TtsVoices>();
+    Dictionary<string, StreamElementsTTS_Unity.TtsVoices> VoicesMap = new Dictionary<string, StreamElementsTTS_Unity.TtsVoices>();
 
     private void Awake()
     {
 #if !UNITY_EDITOR
-        gameObject.SetActive(false);
+                gameObject.SetActive(false);
 #endif
-        List<Dropdown.OptionData> opts = new List<Dropdown.OptionData>();
 
-        var enums = System.Enum.GetValues(typeof(StreamElementsTTS_Unity.TtsVoices));
-        foreach (StreamElementsTTS_Unity.TtsVoices x in enums) {
-            kvp.Add(x.ToString(), x);
-            opts.Add(new Dropdown.OptionData(x.ToString()));
-        }
-
-        dm.VoicesList.AddOptions(opts);
-        dm.VoicesList.value = Array.IndexOf(enums, TTSScript.voice);
-
-        dm.VoicesList.onValueChanged.AddListener(o =>
-        {
-            var y = dm.VoicesList.options[o].text;
-            TTSScript.voice = kvp[y];
-        });
+        VoicesChanger();
+        CharacterChanger();
 
         dm.BtnSpeak.onClick.AddListener(() => {
             CoreTwitchLibSetup.TwitchLibCtrl.Messages.Enqueue(dm.SpeakText.text);
@@ -57,6 +47,45 @@ public class TestHarnessCanvasController : MonoBehaviour
         dm.BtnTogglePause.onClick.AddListener(() =>
         {
             CoreTwitchLibSetup.TwitchLibCtrl.TTSPaused = !CoreTwitchLibSetup.TwitchLibCtrl.TTSPaused;
+        });
+    }
+
+    private void VoicesChanger()
+    {
+
+        List<Dropdown.OptionData> optsForVoicesList = new List<Dropdown.OptionData>();
+
+        var enums = System.Enum.GetValues(typeof(StreamElementsTTS_Unity.TtsVoices));
+        foreach (StreamElementsTTS_Unity.TtsVoices x in enums)
+        {
+            VoicesMap.Add(x.ToString(), x);
+            optsForVoicesList.Add(new Dropdown.OptionData(x.ToString()));
+        }
+
+        dm.VoicesList.AddOptions(optsForVoicesList);
+        dm.VoicesList.value = Array.IndexOf(enums, TTSScript.voice);
+
+        dm.VoicesList.onValueChanged.AddListener(o =>
+        {
+            var y = dm.VoicesList.options[o].text;
+            TTSScript.voice = VoicesMap[y];
+        });
+    }
+
+    private void CharacterChanger()
+    {
+        List<Dropdown.OptionData> optsForCharactersList = new List<Dropdown.OptionData>();
+        foreach (var c in Settings.SettingsManager.Instance.dependencies.AllCharacters)
+        {
+            optsForCharactersList.Add(new Dropdown.OptionData(c.name.ToString()));
+        }
+
+        dm.Characters.AddOptions(optsForCharactersList);
+        dm.Characters.onValueChanged.AddListener(o =>
+        {
+            var y = dm.Characters.options[o].text;
+            GameObject.FindObjectOfType<StreamElementsTTS_Unity.TalkingSprite>().m_ActiveCharacter
+             = Settings.SettingsManager.Instance.dependencies.AllCharacters.First(t => t.name == y);
         });
     }
 }

@@ -262,6 +262,16 @@ namespace CoreTwitchLibSetup
                         _Dependencies.TalkingSprite.isSpeaking = true;
                     }
                     break;
+                case Commands.Character:
+                    if(SenderHasElevatedPermissions(e))
+                    {
+                        var character = _Dependencies.AllCharacters.FirstOrDefault(o => o.name == e.Command.ArgumentsAsString);
+                        if(character != null)
+                            _Dependencies.TalkingSprite.m_ActiveCharacter = character;
+                        else
+                            _client.SendMessage(_Settings.ChannelToConnectTo, $"No character called [{e.Command.ArgumentsAsString}] found.");
+                    }
+                    break;
                 default:
                     break;
             }
@@ -277,6 +287,7 @@ public class Constants {
         internal const string TTS = "tts";
         internal const string Pause = "pause";
         internal const string Resume = "resume";
+        internal const string Character = "character";
     }
 
     public class OauthKeywords {

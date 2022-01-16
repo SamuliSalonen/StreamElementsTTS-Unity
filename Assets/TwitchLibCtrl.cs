@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using TwitchLib.Api.V5.Models.Users;
 using TwitchLib.Client.Models;
 using TwitchLib.PubSub.Events;
 using TwitchLib.Unity;
@@ -9,10 +8,10 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using TwitchLib.Client.Events;
-using TMPro;
 using Newtonsoft.Json.Linq;
 using static Settings.SettingsManager;
 using static Constants;
+using static Logger;
 
 namespace CoreTwitchLibSetup
 {
@@ -20,31 +19,59 @@ namespace CoreTwitchLibSetup
     {
         internal TtsSkipHandler ttsSkipHandler = new TtsSkipHandler();
 
+        // private TwitchAdminCommandReceiver adminCommandReceiver;
+        // private TwitchCommandReceiver commandReceiver;
+        // private TwitchIRCReceiver ircReceiver;
+
         public static Queue<string> Messages = new Queue<string>();
+        public static bool TTSPaused = false;
 
         private Client _client;
         private Api _api;
         private PubSub _pubSub;
-        private string _channelId;
 
-        internal static Action OnMessageWasSkipped;
+        private static JObject SecretsParsed;
+        string GetSetting(string name) => SecretsParsed[name].ToString();
 
         private void Start()
         {
-            OnMessageWasSkipped += () => {
-                // Debug.Log("Something was skipped");
-            };
-
-            Messages = new Queue<string>();
-            var secretsJson = System.IO.File.ReadAllText(_Settings.PathToAuthFile);
-
-            var secretsParsed = JObject.Parse(secretsJson);
-
             Application.runInBackground = true;
 
-            ConnectionCredentials credentials = new ConnectionCredentials(_Settings.BotName, secretsParsed[OauthKeywords.OAUTH].ToString());
+            var secretsJson = System.IO.File.ReadAllText(_Settings.PathToAuthFile);
+            SecretsParsed = JObject.Parse(secretsJson);
+            SetupMessageHandler();
 
-            //setup irc client to connect to twitch
+            SetupIRC();
+            SetupPubSub();
+            SetupAPI();
+        }
+
+        private static void SetupMessageHandler()
+        {
+            Messages = new Queue<string>();
+        }
+
+        private void SetupAPI()
+        {
+            _api = new Api();
+            _api.Settings.ClientId = GetSetting(OauthKeywords.CLIENT_ID);
+        }
+
+        private void SetupPubSub()
+        {
+            _pubSub = new PubSub();
+            _pubSub.OnPubSubServiceConnected += OnPubSubServiceConnected;
+            _pubSub.OnPubSubServiceError += OnPubSubServiceError;
+            _pubSub.OnPubSubServiceClosed += OnPubSubServiceClosed;
+            _pubSub.OnListenResponse += OnListenResponse;
+            _pubSub.OnChannelPointsRewardRedeemed += OnChannelPointsReceived;
+            _pubSub.OnRewardRedeemed += OnRewardRedeemed;
+            _pubSub.Connect();
+        }
+
+        private void SetupIRC()
+        {
+            ConnectionCredentials credentials = new ConnectionCredentials(_Settings.BotName, GetSetting(OauthKeywords.ACCESS_TOKEN));
             _client = new Client();
             _client.Initialize(credentials, _Settings.ChannelToConnectTo);
             _client.OnConnected += OnConnected;
@@ -53,56 +80,34 @@ namespace CoreTwitchLibSetup
             _client.OnMessageReceived += OnMessageReceived;
             _client.OnChatCommandReceived += OnChatCommandReceived;
             _client.Connect();
-
-            _pubSub = new PubSub();
-            _pubSub.OnPubSubServiceError += OnPubSubServiceError;
-            _pubSub.OnPubSubServiceClosed += OnPubSubServiceClosed;
-            _pubSub.OnListenResponse += OnListenResponse;
-            _pubSub.OnChannelPointsRewardRedeemed += OnChannelPointsReceived;
-
-            _pubSub.OnPubSubServiceConnected += (object sender, EventArgs e) => 
-            {
-                StartCoroutine(_api.InvokeAsync(_api.Helix.Users.GetUsersAsync(logins: new List<string> { _Settings.ChannelToConnectTo }).ContinueWith(t =>
-                {
-                    _channelId = t.Result.Users.FirstOrDefault().Id;
-
-                    if (_Settings.UseFallback)
-                        _pubSub.ListenToRewards(_channelId); // GOOD AS A FALLBACK FOR DEBUG.
-                    else
-                        _pubSub.ListenToChannelPoints(_channelId);
-
-                    _pubSub.SendTopics(/*secretsParsed["oauth"].ToString()*/);
-
-                    Debug.Log($"Connected to channel with id: {_channelId}");
-                })));
-            };
-
-            _api = new Api();
-            _api.Settings.ClientId = secretsParsed[OauthKeywords.CLIENT_ID].ToString();
-            _api.Settings.AccessToken = secretsParsed[OauthKeywords.CLIENT_SECRET].ToString();
-            return;
-            StartCoroutine(GetAccessToken(secretsParsed[OauthKeywords.CLIENT_ID].ToString(), secretsParsed[OauthKeywords.CLIENT_SECRET].ToString(), (token) =>
-            {
-                _api.Settings.AccessToken = token;
-
-                // only connect once we have the token
-                _pubSub.Connect();
-            }));
         }
 
-        IEnumerator GetAccessToken(string clientId, string clientSecret, Action<string> callback)
+        public bool GetNextMessage(out string msg)
         {
-            var form = new WWWForm();
-            form.AddField("grant_type", "client_credentials");
-            form.AddField("client_id", clientId);
-            form.AddField("client_secret", clientSecret);
-
-            using (UnityWebRequest www = UnityWebRequest.Post("https://id.twitch.tv/oauth2/token", form))
+            if (TTSPaused)
             {
-                yield return www.SendWebRequest();
-                var json = JObject.Parse(www.downloadHandler.text);
-                callback(json["access_token"].ToString());
+                msg = null;
+                return false;
             }
+
+            if (Messages.Count > 0)
+            {
+                msg = Messages.Dequeue();
+                ttsSkipHandler.ResetVoteAmount();
+                return true;
+            }
+
+            msg = null;
+            return false;
+        }
+
+
+
+        void OnPubSubServiceConnected(object sender, System.EventArgs e)
+        {
+            _pubSub.ListenToRewards(GetSetting(OauthKeywords.CHANNEL_ID));
+            _pubSub.SendTopics(GetSetting(OauthKeywords.LISTEN_AUTH));
+            _pubSub.ListenToChannelPoints(GetSetting(OauthKeywords.CHANNEL_ID));
         }
 
         private void OnPubSubServiceClosed(object sender, EventArgs e)
@@ -133,6 +138,7 @@ namespace CoreTwitchLibSetup
 
         void OnChannelPointRedemption(string rewardTitle, string ttsText)
         {
+            Log("Redemption detected.. " + rewardTitle);
             if (rewardTitle.Equals("Text to Speech!"))
                 Messages.Enqueue(ttsText);
         }
@@ -144,11 +150,11 @@ namespace CoreTwitchLibSetup
 
         private void OnWhisper(object sender, OnWhisperArgs e) => Debug.Log($"{e.Whisper.Data}");
 
-
         private void OnListenResponse(object sender, OnListenResponseArgs e)
         {
+            Debug.Log("Onlistenresp");
             if (e.Successful)
-                Debug.Log("Listening"); // Debug.Log($"Successfully verified listening to topic: {e.Topic}");
+                Debug.Log($"Successfully verified listening to topic: {e.Topic}");
             else
                 Debug.Log($"Failed to listen! Error: {e.Response.Error}");
         }
@@ -189,27 +195,6 @@ namespace CoreTwitchLibSetup
                     Messages.Enqueue(e.ChatMessage.Message.ToLower().Replace(_Settings.StringToReplace, _Settings.StringToReplaceWith));
                 else
                     Messages.Enqueue(e.ChatMessage.Message);
-        }
-
-        public static bool TTSPaused = false;
-
-        public bool GetNextMessage(out string msg)
-        {
-            if (TTSPaused)
-            {
-                msg = null;
-                return false;
-            }
-
-            if (Messages.Count > 0)
-            {
-                msg = Messages.Dequeue();
-                ttsSkipHandler.ResetVoteAmount();
-                return true;
-            }
-
-            msg = null;
-            return false;
         }
 
         private void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
@@ -279,75 +264,4 @@ namespace CoreTwitchLibSetup
 
         bool SenderHasElevatedPermissions(OnChatCommandReceivedArgs e) => e.Command.ChatMessage.IsModerator || e.Command.ChatMessage.IsBroadcaster || e.Command.ChatMessage.IsVip;
     }
-}
-
-public class Constants {
-    public class Commands {
-        internal const string SKIP = "skip";
-        internal const string TTS = "tts";
-        internal const string Pause = "pause";
-        internal const string Resume = "resume";
-        internal const string Character = "character";
-    }
-
-    public class OauthKeywords {
-        internal const string CLIENT_ID = "clientId";
-        internal const string CLIENT_SECRET = "secret";
-        internal const string OAUTH = "oauth";
-    }
-}
-
-public class TtsSkipHandler
-{
-    internal Action<ChatMessage> OnSkipMessageReceived;
-    public TtsSkipHandler() => OnSkipMessageReceived += OnSkip_MessageReceived;
-
-    List<string> Voters = new List<string>();
-
-    int currentVoteAmount = 0;
-    internal void ResetVoteAmount() {
-        Voters = new List<string>();
-        currentVoteAmount = 0;
-    }
-
-    void IncrementVoteAmount(string voter) {
-        Voters.Add(voter);
-        currentVoteAmount++;
-    }
-
-    void OnSkip_MessageReceived(ChatMessage cm)
-    {
-        if (cm.IsBroadcaster || cm.IsModerator)
-        {
-            SkipCurrentMessage();
-            return;
-        }
-
-        if (Voters.Contains(cm.DisplayName))
-            return;
-
-        IncrementVoteAmount(cm.DisplayName);
-    
-        var amtRequired = _Settings.AllowAudienceSkipAmountOfVotesRequired;
-        if (currentVoteAmount >= amtRequired)
-        {
-            SkipCurrentMessage();
-            ResetVoteAmount();
-
-            Output($"{currentVoteAmount}/{amtRequired}");
-        }
-    }
-
-    internal void SkipCurrentMessage()
-    {
-        var utterance = _Dependencies.UtteranceScript;
-        utterance.audioSource.Stop();
-
-        CoreTwitchLibSetup.TwitchLibCtrl.OnMessageWasSkipped?.Invoke();
-
-        _Dependencies.TwitchLibShite.SendMessageFromBot("Skipped!");
-        _Dependencies.ShutUp.Play();
-    }
-
-    void Output(string msg) => Debug.Log($"[SkipHandler] {msg}");
 }

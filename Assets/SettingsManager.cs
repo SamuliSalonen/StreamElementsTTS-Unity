@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -48,6 +49,20 @@ namespace Settings
         }
 
         [System.Serializable] public class AppSettings {
+            /* contents of c:/temp/chatbot.txt
+             {
+	            "secret":"________",
+	            "clientId":"________",
+	            "oauth":"________",
+	            "accessToken":"________",
+	            "refreshToken":"________",
+	            "listenAuth": "________",
+	            "channelId": "________",
+	            "ChannelToConnectTo": "________",
+	            "BotName": "________"
+            }
+             */
+
             [SerializeField] internal ScreenMode Mode;
 
             [Header("Auth")]
@@ -55,8 +70,6 @@ namespace Settings
             [SerializeField] internal bool UseFallback = false;
 
             [Header("Bot")]
-            [SerializeField] internal string ChannelToConnectTo = "clayman666";
-            [SerializeField] internal string BotName = "irishjerngames";
             [SerializeField] internal bool SendConnectedMessage = false;
 
             [Header("Skipping")]
@@ -81,6 +94,14 @@ namespace Settings
             };
 
             public enum ScreenMode : byte { Transparent }
+
+            private static JObject SecretsParsed;
+            internal string GetSettingFromSecrets(string name)
+            {
+                if (SecretsParsed == null) SecretsParsed = JObject.Parse(System.IO.File.ReadAllText(_Settings.PathToAuthFile));
+
+                return SecretsParsed[name].ToString();
+            }
         }
 
         [System.Serializable]

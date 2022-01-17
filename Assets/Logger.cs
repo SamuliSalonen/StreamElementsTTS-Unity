@@ -2,7 +2,7 @@
 
 public class Logger
 {
-    internal static bool LoggingEnabled;
+    internal static bool LoggingEnabled = true;
 
     private static string Sender;
     // internal enum LogLevel { Low, Medium, High }

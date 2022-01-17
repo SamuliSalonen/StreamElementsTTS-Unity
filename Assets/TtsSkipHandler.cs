@@ -50,7 +50,7 @@ public class TtsSkipHandler
         var utterance = _Dependencies.UtteranceScript;
         utterance.audioSource.Stop();
 
-        _Dependencies.TwitchLibShite.SendMessageFromBot("Skipped!");
+        _Dependencies.TwitchLibShite.ircClientChatHandler.SendMessageFromBot("Skipped!");
         _Dependencies.ShutUp.Play();
     }
 

@@ -14,4 +14,9 @@
         internal const string LISTEN_AUTH = "listenAuth";
         internal const string CHANNEL_ID = "channelId";
     }
+
+    public class SettingsFromJson {
+        internal const string CHANNEL_TO_CONNECT_TO = "ChannelToConnectTo";
+        internal const string BOT_NAME = "BotName";
+    }
 }

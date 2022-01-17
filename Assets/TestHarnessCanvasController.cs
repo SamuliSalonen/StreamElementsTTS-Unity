@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using CoreTwitchLibSetup;
 
 public class TestHarnessCanvasController : MonoBehaviour
 {
@@ -35,29 +36,26 @@ public class TestHarnessCanvasController : MonoBehaviour
         CharacterChanger();
 
         dm.BtnSpeak.onClick.AddListener(() => {
-            CoreTwitchLibSetup.TwitchLibCtrl.Messages.Enqueue(dm.SpeakText.text);
+            TwitchLibCtrl.Messages.Enqueue(dm.SpeakText.text);
         });
 
         dm.BtnSetVoice.gameObject.SetActive(false);
 
         dm.BtnSkipCurrent.onClick.AddListener(() => {
-            FindObjectOfType<CoreTwitchLibSetup.TwitchLibCtrl>().ttsSkipHandler.SkipCurrentMessage();
+            TwitchLibCtrl.TtsSkipHandler.SkipCurrentMessage();
         });
 
-        dm.BtnTogglePause.onClick.AddListener(() =>
-        {
-            CoreTwitchLibSetup.TwitchLibCtrl.TTSPaused = !CoreTwitchLibSetup.TwitchLibCtrl.TTSPaused;
+        dm.BtnTogglePause.onClick.AddListener(() => {
+            TwitchLibCtrl.TTSPaused = !TwitchLibCtrl.TTSPaused;
         });
     }
 
     private void VoicesChanger()
     {
-
         List<Dropdown.OptionData> optsForVoicesList = new List<Dropdown.OptionData>();
 
         var enums = System.Enum.GetValues(typeof(StreamElementsTTS_Unity.TtsVoices));
-        foreach (StreamElementsTTS_Unity.TtsVoices x in enums)
-        {
+        foreach (StreamElementsTTS_Unity.TtsVoices x in enums) {
             VoicesMap.Add(x.ToString(), x);
             optsForVoicesList.Add(new Dropdown.OptionData(x.ToString()));
         }
@@ -65,8 +63,7 @@ public class TestHarnessCanvasController : MonoBehaviour
         dm.VoicesList.AddOptions(optsForVoicesList);
         dm.VoicesList.value = Array.IndexOf(enums, TTSScript.voice);
 
-        dm.VoicesList.onValueChanged.AddListener(o =>
-        {
+        dm.VoicesList.onValueChanged.AddListener(o => {
             var y = dm.VoicesList.options[o].text;
             TTSScript.voice = VoicesMap[y];
         });
@@ -75,8 +72,7 @@ public class TestHarnessCanvasController : MonoBehaviour
     private void CharacterChanger()
     {
         List<Dropdown.OptionData> optsForCharactersList = new List<Dropdown.OptionData>();
-        foreach (var c in Settings.SettingsManager.Instance.dependencies.AllCharacters)
-        {
+        foreach (var c in Settings.SettingsManager.Instance.dependencies.AllCharacters) {
             optsForCharactersList.Add(new Dropdown.OptionData(c.name.ToString()));
         }
 

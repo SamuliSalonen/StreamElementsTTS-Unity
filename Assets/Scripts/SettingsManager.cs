@@ -1,5 +1,8 @@
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace Settings
@@ -12,6 +15,32 @@ namespace Settings
         private void Awake()
         {
             ApplySettings();
+            GetExtraCharacters();
+        }
+
+        private void GetExtraCharacters()
+        {
+            string extraCharacterPath = Path.Combine(Application.persistentDataPath, "Characters");
+            if (!Directory.Exists(extraCharacterPath)) return;
+
+            foreach (var d in Directory.EnumerateDirectories(extraCharacterPath))
+            {
+                DirectoryInfo di = new DirectoryInfo(d);
+
+                var OpenM = di.GetDirectories().SingleOrDefault(o => o.Name == "Open");
+                var ClosedM = di.GetDirectories().SingleOrDefault(o => o.Name == "Closed");
+
+                var opens = FileUtils.GetSpritesFromDirectory(OpenM);
+                var closeds = FileUtils.GetSpritesFromDirectory(ClosedM);
+                var character = ScriptableObject.CreateInstance<StreamElementsTTS_Unity.TtsCharacter>();
+
+                character.name = di.Name;
+
+                character.silent = closeds.ToArray();
+                character.talk = opens.ToArray();
+
+                dependencies.AllCharacters.Add(character);
+            }
         }
 
         internal static AppSettings _Settings { get => Instance.settings; }
@@ -43,9 +72,6 @@ namespace Settings
                     dependencies.TransparentScreen.enabled = true;
                     break;
             }
-
-            // settings.AllowAudienceSkip == true ? 1 : 0
-            // settings.AllowAudienceSkipAmountOfVotesRequired
         }
 
         [System.Serializable] public class AppSettings {
@@ -102,6 +128,8 @@ namespace Settings
 
                 return SecretsParsed[name].ToString();
             }
+
+            [SerializeField] internal string ExtraCharactersPath = "";
         }
 
         [System.Serializable]
@@ -110,26 +138,10 @@ namespace Settings
             [SerializeField] public TransparentWindow TransparentScreen;
             [SerializeField] public UnityEngine.UI.Image GreenScreen;
             [SerializeField] public StreamElementsTTS_Unity.StreamElementsTtsUtterance UtteranceScript;
-            // [SerializeField] public StreamElementsTTS_Unity.StreamElementsTTSApi ApiScript;
             [SerializeField] public CoreTwitchLibSetup.TwitchLibCtrl TwitchLibShite;
             [SerializeField] public StreamElementsTTS_Unity.TalkingSprite TalkingSprite;
             [SerializeField] public AudioSource ShutUp;
             [SerializeField] public List<StreamElementsTTS_Unity.TtsCharacter> AllCharacters;
-        }
-    }
-
-    public class ManagerBase<T> : MonoBehaviour where T : Component
-    {
-        static T _instance = null;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null) _instance = FindObjectOfType<T>();
-
-                return _instance;
-            }
         }
     }
 }

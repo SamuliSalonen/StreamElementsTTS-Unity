@@ -15,6 +15,11 @@ namespace CoreTwitchLibSetup
 
             internal void OnMessageReceived(object sender, OnMessageReceivedArgs e)
             {
+                if (e.ChatMessage.Message.Contains("Cheer"))
+                {
+                    Messages.Enqueue(e.ChatMessage.Message);
+                }
+
                 if (e.ChatMessage.DisplayName.StartsWith("buttsbot") && e.ChatMessage.Message != ":D")
                 {
                     Messages.Enqueue(e.ChatMessage.Message.ToLower());

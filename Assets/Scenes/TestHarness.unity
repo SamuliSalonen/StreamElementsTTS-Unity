@@ -2484,12 +2484,12 @@ MonoBehaviour:
   settings:
     Mode: 0
     PathToAuthFile: C:/Temp/chatbot.txt
-    UseFallback: 0
+    UseFallback: 1
     SendConnectedMessage: 1
     AllowAudienceSkipAmountOfVotesRequired: 3
     AllowAudienceSkip: 1
     AllowPauseResume: 1
-    ReplyToButtsbot: 1
+    ReplyToButtsbot: 0
     BardakifyHis: 1
     AntiBitGameyMode: 1
     ReplaceStrings: 0
@@ -3052,9 +3052,6 @@ MonoBehaviour:
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -3457,7 +3454,6 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1

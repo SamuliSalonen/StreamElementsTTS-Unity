@@ -48,10 +48,10 @@ namespace Settings
 
         void ReadExistingSettings()
         {
-            settings.PathToAuthFile = PlayerPrefs.GetString("PathToAuthFile");
-            settings.Mode = (AppSettings.ScreenMode)PlayerPrefs.GetInt("ScreenMode");
-            settings.AllowAudienceSkip = PlayerPrefs.GetInt("AllowAudienceSkip") == 0 ? false : true;
-            settings.AllowAudienceSkipAmountOfVotesRequired = PlayerPrefs.GetInt("AllowAudienceSkipAmountOfVotesRequired");
+            settings.PathToAuthFile = "C:/temp/chatbot.txt"; //PlayerPrefs.GetString("PathToAuthFile");
+            settings.Mode = AppSettings.ScreenMode.Transparent;//(AppSettings.ScreenMode)PlayerPrefs.GetInt("ScreenMode");
+            settings.AllowAudienceSkip = true;//PlayerPrefs.GetInt("AllowAudienceSkip") == 0 ? false : true;
+            settings.AllowAudienceSkipAmountOfVotesRequired = 1;//PlayerPrefs.GetInt("AllowAudienceSkipAmountOfVotesRequired");
         }
 
         public void SaveSettings()

@@ -52,6 +52,7 @@ namespace CoreTwitchLibSetup
                 switch (e.Command.CommandText.ToLower())
                 {
                     case Commands.TTS:
+                        /*
                         if (_Settings.AntiBitGameyMode && e.Command.ChatMessage.Message.Contains("777"))
                         {
                             // Anti-BitGamey
@@ -77,7 +78,7 @@ namespace CoreTwitchLibSetup
                         {
                             Messages.Enqueue(e.Command.ArgumentsAsString);
                         }
-
+                        */
                         break;
                     case Commands.SKIP:
                         if (_Settings.AllowAudienceSkip)

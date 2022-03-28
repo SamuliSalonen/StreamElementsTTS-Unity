@@ -10,7 +10,7 @@ namespace CoreTwitchLibSetup
         private class IrcClientConnectionHandler
         {
             internal void OnConnected(object sender, OnConnectedArgs e) {
-                if (_Settings.SendConnectedMessage) _client.SendMessage(_Settings.GetSettingFromSecrets(SettingsFromJson.CHANNEL_TO_CONNECT_TO), "connected");
+             //   if (_Settings.SendConnectedMessage) _client.SendMessage(_Settings.GetSettingFromSecrets(SettingsFromJson.CHANNEL_TO_CONNECT_TO), "connected");
             }
 
             internal void OnConnectionError(object sender, OnConnectionErrorArgs e) => Log("Connection Error: " + e.Error.Message);

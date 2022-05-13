@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using TwitchLib.Client.Events;
-using static Settings.SettingsManager;
 using static Constants;
+using static Settings.SettingsManager;
 
 namespace CoreTwitchLibSetup
 {
@@ -81,7 +84,7 @@ namespace CoreTwitchLibSetup
                         */
                         break;
                     case Commands.SKIP:
-                        if (_Settings.AllowAudienceSkip)
+                        if (_Settings.AllowAudienceSkip || SenderHasElevatedPermissions(e))
                             TtsSkipHandler.OnSkipMessageReceived?.Invoke(e.Command.ChatMessage);
                         break;
                     case Commands.Pause:
@@ -110,6 +113,21 @@ namespace CoreTwitchLibSetup
                         }
                         break;
                     default:
+                        if (_Settings.UseCommandsList && File.Exists(_Settings.PathToCommandsList))
+                        {
+                            var commands = JsonConvert.DeserializeObject<List<ChatCommand>>(File.ReadAllText(_Settings.PathToCommandsList));
+                            var command = commands.FirstOrDefault(x => x.Name.Equals(e.Command.CommandText.Replace("!", "")));
+
+                            if (command != null && (command.RequireElevatedPermission && SenderHasElevatedPermissions(e) || !command.RequireElevatedPermission))
+                            {
+                                var result = command.Response;
+                                result = result.Replace("$User$", e.Command.ChatMessage.Username);
+                                result = result.Replace("$Message$", e.Command.ChatMessage.Message);
+                                result = result.Replace("$Channel$", $"https://twitch.tv/{e.Command.ChatMessage.Username}");
+
+                                _client.SendMessage(_Settings.GetSettingFromSecrets(SettingsFromJson.CHANNEL_TO_CONNECT_TO), result);
+                            }
+                        }
                         break;
                 }
             }

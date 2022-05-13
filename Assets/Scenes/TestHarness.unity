@@ -2485,6 +2485,8 @@ MonoBehaviour:
     Mode: 0
     PathToAuthFile: C:/Temp/chatbot.txt
     UseFallback: 1
+    ReadOutCommands: []
+    ReadOutCommandFilePaths: []
     SendConnectedMessage: 1
     AllowAudienceSkipAmountOfVotesRequired: 3
     AllowAudienceSkip: 1
@@ -2492,6 +2494,7 @@ MonoBehaviour:
     ReplyToButtsbot: 0
     BardakifyHis: 1
     AntiBitGameyMode: 1
+    TTSViaChatCommand: 0
     ReplaceStrings: 0
     StringToReplace: john
     StringToReplaceWith: me
@@ -2501,6 +2504,8 @@ MonoBehaviour:
     - Streamlabs
     - Nightbot
     - NightBot
+    UseCommandsList: 0
+    PathToCommandsList: 
     ExtraCharactersPath: 
   dependencies:
     TransparentScreen: {fileID: 2032382954}
@@ -2517,6 +2522,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: c0907ba002d26ec4bb482bf3a388a2f9, type: 2}
     - {fileID: 11400000, guid: 9cbf6cca7db04084d8cfe5472fdbe6b9, type: 2}
     - {fileID: 11400000, guid: b50358c273a68cf48ab9b031b305028c, type: 2}
+    - {fileID: 11400000, guid: e39a4387744155a4c9c0df026602f87f, type: 2}
 --- !u!4 &832533964
 Transform:
   m_ObjectHideFlags: 0

@@ -14,8 +14,8 @@ namespace StreamElementsTTS_Unity
 
         static void AudioSourceSampler(AudioSource source)
         {
-         //   source.GetSpectrumData();
-        //    source.GetSpectrumData();
+            //   source.GetSpectrumData();
+            //    source.GetSpectrumData();
         }
 
         internal static IEnumerator SpeakRoutine(string text, TtsVoices voice, AudioSource audioSource)
@@ -25,6 +25,28 @@ namespace StreamElementsTTS_Unity
                 throw new ArgumentException("text");
             }
 
+            string remove = "";
+            float pitchValue = 1;
+            var splitText = text.Split(' ');
+            if (splitText[0] == "pitch")
+            {
+                if (splitText[1] == "random")
+                {
+                    pitchValue = UnityEngine.Random.Range(.5f, 2f);
+                }
+
+                if (float.TryParse(splitText[1], out var pitch))
+                {
+                    pitchValue = pitch;
+                }
+
+                remove = splitText[0] + " " + splitText[1];
+                text = text.Replace(remove, "");
+                //   splitText[1]
+            }
+
+            //string.split(" ")[0].split("=")[0] == "pitch":
+
             var uri = BuildRequestUri(text, voice);
             return GetAudioClipRoutine(uri, (clip) =>
             {
@@ -32,8 +54,9 @@ namespace StreamElementsTTS_Unity
                 float[] samples = new float[clip.samples * clip.channels];
                 clip.GetData(samples, 0);
            */
+                audioSource.pitch = pitchValue;//UnityEngine.Random.Range(.5f, 2f);
                 audioSource.PlayOneShot(clip);
-              
+
             });
         }
 

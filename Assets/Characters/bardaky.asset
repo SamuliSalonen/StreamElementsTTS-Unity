@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7688bd161ecbaaf4d9ec3256d6083d35, type: 3}
+  m_Name: bardaky
+  m_EditorClassIdentifier: 
+  voice: 50
+  silent:
+  - {fileID: 21300000, guid: 2dbb0cb6e7a0f274284953a0c8448fee, type: 3}
+  - {fileID: 21300000, guid: cf8bd0b90088d0847a6a1d38a2f46a5c, type: 3}
+  - {fileID: 21300000, guid: a24619e09c2ef8649873df72cf8d2421, type: 3}
+  - {fileID: 21300000, guid: c0819338d3a683945bab14213c5a82b2, type: 3}
+  - {fileID: 21300000, guid: 83e354f6b65cad546b70e454877c413f, type: 3}
+  - {fileID: 21300000, guid: 604bfbc01bd85b7449abe41a0cf92abd, type: 3}
+  talk:
+  - {fileID: 21300000, guid: d42322c55a8e9cf47aedef5e44e618ae, type: 3}
+  - {fileID: 21300000, guid: cca99d4475f49a84d86bbecc5305eee6, type: 3}
+  - {fileID: 21300000, guid: bf720e0a1d260a94187b67ff2e1f7928, type: 3}
+  - {fileID: 21300000, guid: 233e49be972485b4a9eb41986355252c, type: 3}

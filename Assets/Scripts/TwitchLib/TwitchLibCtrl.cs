@@ -24,7 +24,7 @@ namespace CoreTwitchLibSetup
         internal static readonly TtsSkipHandler TtsSkipHandler = new TtsSkipHandler();
 
         private readonly PubSubVerification pubSubConnectionHandler = new PubSubVerification();
-        private readonly PubSubCommandHandler pubSubCommandHandler = new PubSubCommandHandler();
+        private PubSubCommandHandler pubSubCommandHandler;
 
         private readonly IrcClientConnectionHandler ircClientConnectionHandler = new IrcClientConnectionHandler();
         internal readonly IrcClientChatHandler ircClientChatHandler = new IrcClientChatHandler();
@@ -58,7 +58,8 @@ namespace CoreTwitchLibSetup
             _pubSub.OnPubSubServiceError += pubSubConnectionHandler.OnPubSubServiceError;
             _pubSub.OnPubSubServiceClosed += pubSubConnectionHandler.OnPubSubServiceClosed;
             _pubSub.OnListenResponse += pubSubConnectionHandler.OnListenResponse;
-
+            
+            pubSubCommandHandler = new PubSubCommandHandler(_client);
             _pubSub.OnChannelPointsRewardRedeemed += pubSubCommandHandler.OnChannelPointsReceived;
             _pubSub.OnRewardRedeemed += pubSubCommandHandler.OnRewardRedeemed;
             pubSubConnectionHandler.Connect();

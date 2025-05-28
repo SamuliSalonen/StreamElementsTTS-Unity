@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7688bd161ecbaaf4d9ec3256d6083d35, type: 3}
   m_Name: clay
   m_EditorClassIdentifier: 
-  voice: 8
+  voice: 46
   silent:
   - {fileID: 21300000, guid: ece8ea0cabeb8294ca0a20e2c81ae3dc, type: 3}
   talk:

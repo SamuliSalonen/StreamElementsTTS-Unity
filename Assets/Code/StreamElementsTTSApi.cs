@@ -44,6 +44,7 @@ namespace StreamElementsTTS_Unity
 
         public static string BuildRequestUri(string ttsText, TtsVoices voice)
         {
+
             return $"https://api.streamelements.com/kappa/v2/speech?voice={voice.TtsVoiceToString()}&text={ttsText}";
         }
 
